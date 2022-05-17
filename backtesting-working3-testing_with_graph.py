@@ -141,11 +141,24 @@ def getdata(symbol, interval, lookback, rollback): #back 400 hours, these settin
 
 
 
+
+rollback_in = 7
+
 #pass data working
 #getdata(TICKER, time interval, period back, rollback statistics average sample)
-df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '20000', 15)
+#df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '20000', rollback_in)
 
 
+
+approach_high_in = 0.980
+approach_low_in = 1.020
+
+while (approach_high_in < 1.020):
+    print ("appr",approach_high_in)
+    approach_high_in = approach_high_in + 0.001
+    
+
+    
 #print(df)
 
 
