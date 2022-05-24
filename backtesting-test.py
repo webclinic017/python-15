@@ -25,15 +25,15 @@ def getdata(symbol, interval2, lookback2): #back 400 hours, these settings are d
     frame.index = pd.to_datetime(frame.index, unit='ms')
     frame = frame.astype(float)
     ##take the max of last 15 days rolling and define the upper band of trend price
-    frame['rollhigh'] = df.High.rolling(15).max()
-    frame['rolllow'] = df.Low.rolling(15).min()
-    frame['mid'] = (df.rollhigh + df.rolllow)/2
+    frame['rollhigh'] = frame.High.rolling(15).max()
+    frame['rolllow'] = frame.Low.rolling(15).min()
+    frame['mid'] = (frame.rollhigh + frame.rolllow)/2
     
     #define the lever of price approaching the upper band by 0.4% or nearly 99.6% close to high band
-    frame['approach_high'] = np.where(df.Close > df.rollhigh * 0.996, 1, 0)    
+    frame['approach_high'] = np.where(frame.Close > frame.rollhigh * 0.996, 1, 0)    
     #sets 1 if yes approaching high and 0 if not in range of the upper band
     
-    frame['price_above_mid'] = np.where(df.Close > df.mid, 1, 0)
+    frame['price_above_mid'] = np.where(frame.Close > frame.mid, 1, 0)
     #1 if price is above midline or 0 if below, use this to calculate the crossing of midline 0->1 or 1->0
     
     #to find out the crossing through midline, check if the difference b/w this close and previous is 1, if its zero then this and prev are the same
@@ -46,32 +46,32 @@ def getdata(symbol, interval2, lookback2): #back 400 hours, these settings are d
     in_position = False
     buydates, selldates = [],[] 
     
-    for i in range(len(df)):
+    for i in range(len(frame)):
     #buying part of function
         if not in_position: #if no crypto not held 
-            if df.iloc[i].price_above_mid: #if price_cross is 1/True which means sell
-                buydates.append(df.iloc[i+1].name) #add event to buy date, buy point
+            if frame.iloc[i].price_above_mid: #if price_cross is 1/True which means sell
+                buydates.append(frame.iloc[i+1].name) #add event to buy date, buy point
                 #the name is the name of the date just type df.iloc[0].name to see it
                 #the '+1' is added to avoid the forward looking bias, ie the buy is on the next day not immediate
             in_position = True # you now bought and holding crypto so in position is true
         #now for the selling part
         if in_position: #if you hold crypto and testing for sell signal
-            if df.iloc[i].approach_high: #if high approach signal is 1 or true (signal is near the upper band)
-                selldates.append(df.iloc[i+1].name)
+            if frame.iloc[i].approach_high: #if high approach signal is 1 or true (signal is near the upper band)
+                selldates.append(frame.iloc[i+1].name)
                 in_position = False
             
     print(buydates)
     #print(df)
     plt.figure(figsize=(20,10))
-    plt.plot(df[['Close','rollhigh','rolllow','mid']])
-    plt.scatter(buydates, df.loc[buydates].Open, marker='^', color='g', s=200)
-    plt.scatter(selldates, df.loc[selldates].Open, marker='v', color='r', s=200)
+    plt.plot(frame[['Close','rollhigh','rolllow','mid']])
+    plt.scatter(buydates, frame.loc[buydates].Open, marker='^', color='g', s=200)
+    plt.scatter(selldates, frame.loc[selldates].Open, marker='v', color='r', s=200)
     
     plt.style.use('dark_background')
     plt.figure(figsize=(20,10))
-    plt.plot(df[['Close','rollhigh','rolllow','mid']])
-    plt.scatter(buydates, df.loc[buydates].Open, marker='^', color='g', s=200)
-    plt.scatter(selldates, df.loc[selldates].Open, marker='v', color='r', s=200)
+    plt.plot(frame[['Close','rollhigh','rolllow','mid']])
+    plt.scatter(buydates, frame.loc[buydates].Open, marker='^', color='g', s=200)
+    plt.scatter(selldates, frame.loc[selldates].Open, marker='v', color='r', s=200)
     return frame
 
 df=getdata('BTCUSDT','1h','200')

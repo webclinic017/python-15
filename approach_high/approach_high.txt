@@ -1,0 +1,8 @@
+
+
+best approach high and low :
+
+approach high = 0.997
+approach low = 1.004
+
+

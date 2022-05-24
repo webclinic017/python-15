@@ -85,7 +85,7 @@ def get_rocp(df):
 #    or don’t detect a flat peak (None).
 #    valley (bool, optional (default = False)) – if True (1), detect valleys (local minima) instead of peaks.
 def get_peaks(df,mph):
-    ind = detect_peaks(df['Close'], edge='both', mph=mph, mpd=5, valley=False, show=True) 
+    ind = detect_peaks(df['Close'], edge='both', mph=mph, mpd=10, valley=False, show=True) 
     print(ind)
 
 

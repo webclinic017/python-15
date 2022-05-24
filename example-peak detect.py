@@ -14,7 +14,7 @@ vector = [
     1, 20, 7, 3, 0 ]
 
 print('Detect peaks with distance filters.')
-peaks = peakdetect.peakdetect(np.array(vector), lookahead=2, delta=2)
+peaks = peakdetect.peakdetect(np.array(vector), lookahead=1, delta=2)
 # peakdetect returns two lists, respectively positive and negative peaks,
 # with for each peak a tuple of (indexes, values).
 indexes = []

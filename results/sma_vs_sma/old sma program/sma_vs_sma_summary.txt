@@ -1,0 +1,14 @@
+
+
+from 1 -50 fast and 50 - 100 slow on ethbtc, 2000 hrs, 1hr interval,
+
+
+returns 	slow		fast
+297		57		1
+290 		60 		3
+287		56		1
+282		54		4		
+282		65		3
+278		53		1
+274		55		1
+

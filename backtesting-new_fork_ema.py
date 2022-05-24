@@ -6,6 +6,8 @@ Created on Tue May 10 16:32:55 2022
 @author: bronx
 """
 
+#implement 200sma and 50sma to u/d buy strategy going up only
+
 #https://www.youtube.com/watch?v=wvmnlIsAzok&t=
 
 import pandas as pd
@@ -23,7 +25,7 @@ client=Client()
 #df,symbol,interval,lookback,rollback=getdata('ETHUSDT','1h', '150', 15)
 #df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '1000', 35)
 #returns the dataframe symbol/hr interval,lookback period, rollback so it can be used 
-def getdata(symbol, interval, lookback, rollback, approach_high_in, approach_low_in, hours_held): #back 400 hours, these settings are default values, so pass any value you need for this 
+def getdata(symbol, interval, lookback, rollback, approach_high_in, approach_low_in, hours_held, in_200ema, in_50ema, in_1ema, in_2ema): #back 400 hours, these settings are default values, so pass any value you need for this 
     lookback = str(lookback) #convert the passed lookback value to integer since its being added to something HOURS UTC
 #    rollback = int(rollback) #convert to int
     #original line
@@ -55,12 +57,12 @@ def getdata(symbol, interval, lookback, rollback, approach_high_in, approach_low
     #this will set 1 to when the price crosses the mid line ie when diff in approach_low changes from 0 to 1
     
 #    #get 200sma from talib and put it into the frame
-#    frame['SMA200']=indicators.talib.SMA(frame.Close, timeperiod=200) #make this variable
-#    frame['SMA100']=indicators.talib.SMA(frame.Close, timeperiod=100) #make this variable
-    frame['SMA50']=indicators.talib.EMA(frame.Close, timeperiod=20) #make this variable
-    frame['SMA21']=indicators.talib.EMA(frame.Close, timeperiod=2) #make this variable
+    frame['EMA200']=indicators.talib.EMA(frame.Close, timeperiod=in_200ema) #make this variable
+    frame['EMA50']=indicators.talib.EMA(frame.Close, timeperiod=in_50ema) #make this variable
+    frame['EMA1']=indicators.talib.EMA(frame.Close, timeperiod=in_1ema) #make this variable
+    frame['EMA2']=indicators.talib.EMA(frame.Close, timeperiod=in_2ema) #make this variable
 #    https://www.youtube.com/watch?v=hTDVTH8umR8 
-    frame = frame.dropna()
+    
 #    #stochastic RSI
 #    frame['fastk'], frame['fastd'] = indicators.talib.STOCHRSI(frame.Close, timeperiod=14, fastk_period=5, fastd_period=3, fastd_matype=0)
 #    
@@ -83,31 +85,41 @@ def getdata(symbol, interval, lookback, rollback, approach_high_in, approach_low
     # print(frame)
     in_position = False
     buydates, selldates = [],[]
-    
+
     for i in range(len(frame)):
     #buying part of function
         if not in_position: #if no crypto not held 
 #            if frame.iloc[i].approach_low: #if price_cross is 1/True which means sell
             # if frame.iloc[i].approach_low and (frame.iloc[i].RSI<45) and (frame.MACD.iloc[i-1] > frame.MACDsig.iloc[i-1]): #if price_cross is 1/True which means sell
-            if  frame.SMA21[i] > frame.SMA50[i]: #if price_cross is 1/True which means sell
+            # difference = this_buy_time - last_buy_time
+            if (frame.EMA200[i-1] >= frame.EMA50[i-1] and frame.EMA200[i] <= frame.EMA50[i]) or frame.iloc[i].approach_low: #if price_cross is 1/True which means sell
                 buydates.append(frame.iloc[i+1].name) #add event to buy date, buy point
                 # print("buying at ",frame.iloc[i].Close)           
                 #the name is the name of the date just type df.iloc[0].name to see it
                 #the '+1' is added to avoid the forward looking bias, ie the buy is on the next day not immediate
                 in_position = True # you now bought and holding crypto so in position is true
+                # last_buy_open = frame.loc[selldates[len(selldates) - 1]].Open
+                # this_buy_open = frame.loc[selldates[len(selldates) - 1]].Open
+                # this_sale_open = frame.loc[buydates[len(buydates) - 1]].Open
+                # last_sale_time = frame.loc[buydates[len(buydates) - 2]].name
+                # last_buy_time = frame.loc[selldates[len(selldates) - 2]].name
+                # this_buy_time = frame.loc[selldates[len(selldates) - 1]].name
         #now for the selling part
         if in_position: #if you hold crypto and testing for sell signal
 #            if frame.iloc[i].approach_high: #if high approach signal is 1 or true (signal is near the upper band)
             # if frame.iloc[i].approach_high and (frame.iloc[i].RSI>55) and (frame.MACD.iloc[i-1] < frame.MACDsig.iloc[i-1]) : #if high approach signal is 1 or true (signal is near the upper band)
             # last_sale_open = frame.loc[buydates[len(buydates) - 1]].Open
-            # last_sale_time = frame.loc[buydates[len(buydates) - 2]].name
-            # this_sale_time = frame.loc[buydates[len(buydates) - 1]].name
-            # difference = this_sale_time - last_sale_time
+            last_sale_open = frame.loc[buydates[len(buydates) - 2]].Open
+            this_sale_open = frame.loc[buydates[len(buydates) - 1]].Open
+            last_sale_time = frame.loc[buydates[len(buydates) - 2]].name
+            this_sale_time = frame.loc[buydates[len(buydates) - 1]].name
+            difference = this_sale_time - last_sale_time
             # time_diff = timedelta(days = 0, hours = hours_held)
+            # print("last sale open, this sale open, last time, this time", last_sale_open,this_sale_open,last_sale_time,this_sale_time)
             # print("this time, last time, diff, time diff", this_sale_time,last_sale_time,difference,time_diff)
-            # if (frame.iloc[i].approach_high and frame.iloc[i].Close > last_sale_open) or (frame.iloc[i].approach_high and time_diff < difference):#if high approach signal is 1 or true (signal is near the upper band)
-            if frame.SMA21[i] < frame.SMA50[i] :#if high approach signal is 1 or true (signal is near the upper band)
-            # last_sale = frame.loc[buydates[len(buydates) - 1]].Open
+            if (frame.iloc[i].approach_high and frame.iloc[i].Close > this_sale_open): #or (frame.EMA200[i-1] < frame.EMA50[i-1] and frame.EMA200[i] > frame.EMA50[i]):#if high approach signal is 1 or true (signal is near the upper band)
+                # print("this iloc.close, this sale open",frame.iloc[i].Close, this_sale_open)    
+                # last_sale = frame.loc[buydates[len(buydates) - 1]].Open
                 # print("-----current price and last buy price", frame.iloc[i], last_sale)    
                 # print("-----current price and last buy price", frame.iloc[i].Close, last_sale_open)    
                 # print("-----SAR", frame.SAR[i], last_sale_open)
@@ -116,6 +128,9 @@ def getdata(symbol, interval, lookback, rollback, approach_high_in, approach_low
                 # print("sale held for days ", difference)
                 selldates.append(frame.iloc[i+1].name)
                 in_position = False
+            # print("last sale open, last sale time",last_sale_open,last_sale_time)
+            # print("this sale open, this sale time",this_sale_open,this_sale_time) 
+
     # print("buy", len(buydates))
     # print("sell", len(selldates))
     #make a drades data frame aranspose it with the .T
@@ -130,7 +145,7 @@ def getdata(symbol, interval, lookback, rollback, approach_high_in, approach_low
     #so we take off the 0.0015% from the relative profit table and put it into 'net_profit' table
     tradesdf['net_profit']=tradesdf.profits_rel - 0.0015
     tradesdf = tradesdf.dropna()
-    # print(tradesdf)
+    print(tradesdf)
             
     #print("buydates", buydates)
     #print("selldates", selldates)
@@ -140,18 +155,17 @@ def getdata(symbol, interval, lookback, rollback, approach_high_in, approach_low
     print("rollback stat", rollback)
     print("appraoch_high_in", approach_high_in)          
     print("approach_low_in", approach_low_in)
-    print("days held", hours_held)
+    # print("days held", hours_held)
     print("buy transactions",len(buydates))
     print("sell transactions",len(selldates))
     print("total return in %",((tradesdf.net_profit + 1).prod() - 1 ) * 100)
-    
-    f = open("temp.csv", "a", newline="")
-    tup1 = (interval,lookback,rollback,approach_high_in, approach_low_in, hours_held, len(buydates),len(selldates),((tradesdf.net_profit + 1).prod() - 1 ) * 100)
+    f = open("test2.csv", "a", newline="")
+    tup1 = (interval,lookback,rollback,approach_high_in, approach_low_in, in_200ema, in_50ema, in_1ema, in_2ema, len(buydates), len(selldates),((tradesdf.net_profit + 1).prod() - 1 ) * 100)
     writer = csv.writer(f)
     writer.writerow(tup1)
     f.close()
     plt.figure(figsize=(20,10))
-    plt.plot(frame[['Close','rollhigh','rolllow','SMA21','SMA50']])
+    plt.plot(frame[['Close','rollhigh','rolllow','EMA1','EMA2','EMA200','EMA50']])
     plt.scatter(buydates, frame.loc[buydates].Open, marker='^', color='g', s=200)
     plt.scatter(selldates, frame.loc[selldates].Open, marker='v', color='r', s=200)
 #    plt.figure(figsize=(20,10))
@@ -192,9 +206,17 @@ rollback_in = 15
 #     df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '40000', rollback_in, f, 1.02)
 #     f = f + a
 # for rollback_in in range(35,50):
-# for hours_held in range(1, 3):
-df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '20000', 15, 0.996, 1.004, 2)
-    
+# for hours_held in range(2,3):
+hours_held = 0 #not used yet
+# for in_200ema in (200,201):
+#     for in_50ema in (45,46):
+#         for in_1ema in (20,21):
+#             for in_2ema in (2,3):
+#                 df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '2000', 15, 0.996, 1.004, hours_held, in_200ema, in_50ema, in_1ema, in_2ema)
+          
+df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '20000', 15, 0.996, 1.004, hours_held, 200, 50, 2, 21)
+
+        
 # indicators.plot_mixed(df)
 
 #print(df)

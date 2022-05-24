@@ -191,7 +191,7 @@ rollback_in = 15
 #     df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '40000', rollback_in, f, 1.02)
 #     f = f + a
 # for rollback_in in range(35,50):
-for hours_held in range(1, 10):
+for hours_held in range(2,3):
     df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '800', 15, 0.996, 1.004, hours_held)
     
 # indicators.plot_mixed(df)
