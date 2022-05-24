@@ -1,0 +1,66 @@
+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
+
+https://www.youtube.com/watch?v=8JJ101D3knE
+
+setting up :
+git config --global user.email "cipreanu@hotmail.com"
+git config --global user.name "cipreanu"
+git config --global core.editor "gedit --wait" (configure the default editor gedit)
+git config --global -e (edit the main config file settings)
+git config --global core.autocrlf input (if on windows set it to true without quotes, if on mac/linux input)
+
+git add . (adds all the files and subdirectories to repository)
+git commit -a -m "this will go straight to git, bypassing the staging area, no need to add files"
+
+show all the files in the staging area:
+1. git ls-files
+
+removing files from git 3 step process (the long way):
+1. rm file2.txt
+2. git add file2.txt 
+3. git commit -m "removed unused file"
+
+removing files from git 3 step process (the short way):
+1. git rm file2.txt (start with git command)
+2. git commit -m "file deleted"
+
+renaming file :
+1. git mv file.txt file1.js
+2. git commit -m "renamed the file"
+
+to ignore files in git directory :
+1. echo file1.txt > .gitignore (put filename in .gitignore file, > create >> apppend)
+2. echo logs/ >> .gitignore (append logs directory to ignore list)
+3. git add .gitignore
+4. git commit -m "add gitignore"
+
+remove bin directory from commits if bin is only used for executing code but we dont want to upload it
+(if bin shows up when command "git ls-files" executed and you want to remove a directory "bin/" listed):
+1. git rm --cached -r bin/ (cached means staging area, use -r for recursive removal)
+2. git commit -m "removed the bin dir"
+the above always ignores all files added to bin subdirectory
+
+show short status output:
+1. git status -s
+M - modified (red modified, green added)
+?? - 
+A - added (green)
+
+show differences b/w changed files :
+1. git diff --staged (shows staged changes)
+2. git diff (shows unstaged changes)
+
+show all logs
+1. git log
+2. git log --oneline (shows short one line description of changes)
+3. git log --oneline --reverse (shows the descriptions in reverse order)
+
+
+GIT GUI
+https://www.youtube.com/watch?v=Guva-oab1pg
+extensions used in visual studio code :
+- gitlens
+- git history
+- git graph
+
+

@@ -161,6 +161,7 @@ def getdata(symbol, interval, lookback, rollback, approach_high_in, approach_low
 
 
 
+<<<<<<< HEAD
 rollback_in = 15
 
 #pass data working
@@ -195,7 +196,25 @@ for hours_held in range(2,3):
     df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '800', 15, 0.996, 1.004, hours_held)
     
 # indicators.plot_mixed(df)
+=======
+rollback_in = 7
 
+#pass data working
+#getdata(TICKER, time interval, period back, rollback statistics average sample)
+#df,symbol,interval,lookback,rollback=getdata('ETHBTC','1h', '20000', rollback_in)
+
+
+
+approach_high_in = 0.980
+approach_low_in = 1.020
+>>>>>>> newbranch
+
+while (approach_high_in < 1.020):
+    print ("appr",approach_high_in)
+    approach_high_in = approach_high_in + 0.001
+    
+
+    
 #print(df)
 
 
